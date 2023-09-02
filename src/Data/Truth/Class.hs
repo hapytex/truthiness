@@ -1,4 +1,4 @@
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE FlexibleInstances, Safe, UndecidableInstances #-}
 
 module Data.Truth.Class where
 
@@ -27,7 +27,7 @@ truthyAnd x
   | truthy x = const x
   | otherwise = id
 
-truthyAnd' :: (Truthy bool₁, Truthy bool₂) => bool₁ -> bool₂ -> Either bool₁ bool₂
+truthyAnd' :: Truthy bool₁ => bool₁ -> bool₂ -> Either bool₁ bool₂
 truthyAnd' x
   | truthy x = const (Left x)
   | otherwise = Right
@@ -37,13 +37,22 @@ truthyOr x
   | truthy x = id
   | otherwise = const x
 
-truthyOr' :: (Truthy bool₁, Truthy bool₂) => bool₁ -> bool₂ -> Either bool₁ bool₂
+truthyOr' :: Truthy bool₁ => bool₁ -> bool₂ -> Either bool₁ bool₂
 truthyOr' x
   | truthy x = Right
   | otherwise = const (Left x)
 
 guardTruth :: (Alternative f, Truthy bool) => bool -> f ()
 guardTruth = guard . truthy
+
+instance {-# OVERLAPPABLE #-} Foldable f => Truthy (f a) where
+  falsy = null
+
+instance {-# OVERLAPPABLE #-} (Eq a, Num a) => Truthy a where
+  truthy 0 = False
+  truthy _ = True
+  falsy 0 = True
+  falsy _ = False
 
 instance Truthy Bool where
   truthy = id
