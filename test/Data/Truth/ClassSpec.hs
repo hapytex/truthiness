@@ -10,6 +10,8 @@ sameFunc :: (Bool -> Bool -> Bool) -> (Bool -> Bool -> Bool) -> Bool -> Bool -> 
 sameFunc f g = go
   where go x y = f x y == g x y
 
+-- sameFuncL :: (
+
 spec :: Spec
 spec = do
   describe "equalty with Bool" $ do

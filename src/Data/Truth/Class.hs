@@ -5,6 +5,7 @@ module Data.Truth.Class (
     Falsy(false),
     ifTruth, guardTruth,
     truthyAnd, truthyAnd', truthyOr, truthyOr', truthyXor,
+    truthyOrF,
     (∧), (∨), (⊻)
   ) where
 
@@ -35,20 +36,20 @@ ifTruth c
 truthyAnd :: Truthy 𝕓 => 𝕓 -> 𝕓 -> 𝕓
 truthyAnd x = ifTruth x id (const x)
 
-truthyAnd' :: Truthy bool₁ => bool₁ -> bool₂ -> Either bool₁ bool₂
+truthyAnd' :: Truthy 𝕓₁ => 𝕓₁ -> 𝕓₂ -> Either 𝕓₁ 𝕓₂
 truthyAnd' x = ifTruth x Right (const (Left x))
 
 truthyOr :: Truthy 𝕓 => 𝕓 -> 𝕓 -> 𝕓
 truthyOr x = ifTruth x (const x) id
 
-truthyOr' :: Truthy bool₁ => bool₁ -> bool₂ -> Either bool₁ bool₂
+truthyOr' :: Truthy 𝕓₁ => 𝕓₁ -> 𝕓₂ -> Either 𝕓₁ 𝕓₂
 truthyOr' x = ifTruth x (const (Left x)) Right
 
 truthyXor :: Falsy 𝕓 => 𝕓 -> 𝕓 -> 𝕓
 truthyXor x y
   | tx == ty = false
   | tx = x
-  | ty = y
+  | otherwise = y
   where tx = truthy x
         ty = truthy y
 
@@ -63,6 +64,9 @@ guardTruth = guard . truthy
 
 (⊻) :: Falsy 𝕓 => 𝕓 -> 𝕓 -> 𝕓
 (⊻) = truthyXor
+
+truthyOrF :: (Foldable f, Falsy 𝕓) => f 𝕓 -> 𝕓
+truthyOrF = foldr truthyOr false
 
 instance {-# OVERLAPPABLE #-} Foldable f => Truthy (f 𝕓) where
   falsy = null
